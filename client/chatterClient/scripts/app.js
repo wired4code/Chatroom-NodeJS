@@ -1,5 +1,5 @@
 var app = {
-  server: "https://api.parse.com/1/classes/chatterbox/",
+  server: "http://127.0.0.1:3000/classes/chatterbox/",
   username: window.location.search.substr(10),
   // default room which shows messages from all rooms
   room: 'all',
@@ -12,7 +12,7 @@ var app = {
 
   send: function(message) {
     $.ajax({
-        url: 'https://api.parse.com/1/classes/chatterbox',
+        url: 'http://127.0.0.1:3000/classes/chatterbox/',
         type: 'POST',
         data: JSON.stringify(message),
         contentType: 'application/json',
@@ -27,9 +27,9 @@ var app = {
 
   fetch: function(roomName){
     if (roomName === undefined || app.room === 'all') {
-      $.ajax({ 
-        type: 'GET', 
-        url: app.server, 
+      $.ajax({
+        type: 'GET',
+        url: "http://127.0.0.1:3000/classes/chatterbox/",
         data: {
           order: '-createdAt',
           limit: 20
@@ -39,6 +39,8 @@ var app = {
           // fetch will be called in setInterval so on each call the chats will be cleared
           $('.chat').empty();
           // new messages will be appended to the .chat div
+
+          //its checking if friend added to friend list is already a friend and will highlight their texts
           _.each(data.results, function(message) {
             if (app.friends[message.username] === message.username) {
               message.friend = true;
@@ -52,9 +54,9 @@ var app = {
       });
       // if fetch is invoked with a roomName parameter
     } else {
-      $.ajax({ 
-        type: 'GET', 
-        url: app.server, 
+      $.ajax({
+        type: 'GET',
+        url: "http://127.0.0.1:3000/classes/chatterbox/",
         data: {
           // query parse.com for messages with a matching roomname key ONLY
           where: JSON.stringify({roomname: roomName}),
@@ -108,9 +110,9 @@ var app = {
 
   // called when page is first loaded on line 192 and fills room dropdown menu
   populateRoomList: function() {
-    $.ajax({ 
-      type: 'GET', 
-      url: app.server, 
+    $.ajax({
+      type: 'GET',
+      url: app.server,
       // without limit set, default is 100 message objects retrieved
       data: {
         order: '-createdAt',
