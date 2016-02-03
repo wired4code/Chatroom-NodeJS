@@ -6,45 +6,54 @@ var headers = {
   "Content-Type": "application/json"
 };
 
+var sendResponse = function(response, data, statusCode){
+  statusCode = statusCode || 200;
+  response.writeHead(statusCode, headers);
+  response.end(JSON.stringify(data));
+};
 
-exports.requestHandler = function(request, response) {
-  var results = [];
+var collectData = function(request, cb){
+  var data = "";
+
+  request.on('data', function(chunk){
+    data += chunk;
+  });
+
+  request.on('end', function(){
+    cb( JSON.parse(data) );
+  });
+};
+
+var objectID = 1;
+
+var messages = [
+  {
+    username: 'Joe',
+    text: 'Hello World',
+    objectID: objectID,
+    roomname: 'all'
+  }
+];
+
+module.exports = function(request, response) {
+
   console.log("Serving request type " + request.method + " for url " + request.url);
 
-
-  var statusCode = statusCode || 200;
-  response.writeHead(statusCode, headers);
-
-  if(request.url !== "/classes/messages" && request.url !== '/classes/room1'){
-    response.writeHead(404, headers);
-    response.end('Error message');
-  } else {
-
     if(request.method === "POST"){
-      response.writeHead(201, headers);
-      var body = '';
-      request.on('data', function(chunk) {
-        body+=chunk;
-      }).on('end', function() {
-        body = JSON.parse(body);
-        results.push(body);
+      collectData(request, function(message){
+        messages.push(message);
+        message.objectID = ++objectID;
+        sendResponse(response,{objectID: objectID});
       });
-    }
+   }
 
     if(request.method === "GET"){
-      response.writeHead(200, headers);
-      var messages = JSON.stringify(results);
-      //response.end('{"results": messages}');
-      response.end('{"username": "Jono","message": "Do my bidding!", "results": []}');
+      sendResponse(response, {results: messages});
     }
 
     if(request.method === "OPTIONS"){
-      response.writeHead(200, headers);
-      response.end('{"roomName":"lobby", "results": []}');
+      sendResponse(response, null);
     }
-  }
-
-
 };
 
 
